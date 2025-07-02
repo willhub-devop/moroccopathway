@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
-import Image from '../../components/AppImage';
-import Button from '../../components/ui/Button';
+
+
 import TabNavigation from '../../components/ui/TabNavigation';
 import BreadcrumbTrail from '../../components/ui/BreadcrumbTrail';
+import Header from '../../components/ui/Header';
 import WelcomeBanner from './components/WelcomeBanner';
 import UpcomingSessionsCard from './components/UpcomingSessionsCard';
 import AssessmentProgressCard from './components/AssessmentProgressCard';
 import RecommendationsCard from './components/RecommendationsCard';
 import QuickActionsCard from './components/QuickActionsCard';
-import NotificationCenter from './components/NotificationCenter';
+
 
 const StudentDashboard = () => {
   const [currentLanguage, setCurrentLanguage] = useState('fr');
@@ -22,6 +23,14 @@ const StudentDashboard = () => {
     const savedLanguage = localStorage.getItem('language') || 'fr';
     setCurrentLanguage(savedLanguage);
     loadDashboardData();
+
+    // Listen for language changes
+    const handleLanguageChange = (event) => {
+      setCurrentLanguage(event.detail.language);
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange);
+    return () => window.removeEventListener('languageChanged', handleLanguageChange);
   }, []);
 
   // Mock student data
@@ -132,7 +141,7 @@ const StudentDashboard = () => {
       nameFr: "Sciences Économiques et Gestion",
       nameAr: "العلوم الاقتصادية والتدبير",
       descriptionFr: "Études en économie, gestion d\'entreprise et finance, préparant aux carrières dans le secteur privé et public.",
-      descriptionAr: "دراسات في الاقتصاد وإدارة الأعمال والمالية، تعد للمهن في القطاع الخاص والعام.",
+      descriptionAr: "دراسات في économie وإدارة الأعمال والمالية، تعد للمهن في القطاع الخاص والعام.",
       category: 'economics',
       matchPercentage: 78,
       rating: 4,
@@ -211,77 +220,16 @@ const StudentDashboard = () => {
     );
   };
 
-  const handleLanguageToggle = () => {
-    const newLanguage = currentLanguage === 'fr' ? 'ar' : 'fr';
-    setCurrentLanguage(newLanguage);
-    localStorage.setItem('language', newLanguage);
-  };
-
-  const handleProfileClick = () => {
-    // Navigate to profile page (not implemented in this scope)
-    console.log('Navigate to profile');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('language');
-    navigate('/student-login');
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-surface border-b border-border sticky top-0 z-50">
-        <div className="px-4 sm:px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Icon name="GraduationCap" size={20} className="text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-lg font-heading font-semibold text-text-primary">
-                  MoroccoPathway
-                </h1>
-                <p className="text-xs text-text-secondary font-caption">
-                  {currentLanguage === 'ar' ? 'منصة التوجيه الأكاديمي' : 'Plateforme d\'orientation académique'}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLanguageToggle}
-                className="text-text-secondary hover:text-primary"
-              >
-                <Icon name="Languages" size={18} />
-                <span className="ml-1 text-xs font-caption">
-                  {currentLanguage === 'fr' ? 'عربي' : 'FR'}
-                </span>
-              </Button>
-              
-              <NotificationCenter
-                notifications={notifications}
-                onMarkAsRead={handleMarkNotificationAsRead}
-                onMarkAllAsRead={handleMarkAllNotificationsAsRead}
-              />
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleProfileClick}
-                className="p-1"
-              >
-                <Image
-                  src={studentData.avatar}
-                  alt={`Photo de ${studentData.name}`}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header with Logo and Auth Buttons */}
+      <Header 
+        student={studentData}
+        notifications={notifications}
+        onMarkNotificationAsRead={handleMarkNotificationAsRead}
+        onMarkAllNotificationsAsRead={handleMarkAllNotificationsAsRead}
+        showAuthButtons={true}
+      />
 
       {/* Breadcrumb */}
       <BreadcrumbTrail />
